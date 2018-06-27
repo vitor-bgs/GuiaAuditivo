@@ -18,7 +18,12 @@ public class MainActivity extends Activity {
         List<Coordenadas> co = new ArrayList<Coordenadas>();
         ImageView iv = (ImageView) findViewById(R.id.imageView);
 
-        iv.setOnTouchListener(new TouchEvents(new RunOnPressAndHold(iv, co, this), this));
+        Controlador controlador = new Controlador(this, iv, co);
 
+        iv.setOnTouchListener(new ImageViewNavigation(this, controlador));
     }
+
+
+
+
 }

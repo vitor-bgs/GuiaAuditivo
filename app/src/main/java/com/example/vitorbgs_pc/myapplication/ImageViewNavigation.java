@@ -6,7 +6,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-public class TouchEvents implements View.OnTouchListener {
+public class ImageViewNavigation implements View.OnTouchListener {
 
     float xdown, xup;
     float ydown, yup;
@@ -14,15 +14,16 @@ public class TouchEvents implements View.OnTouchListener {
     int yscroll = 0;
 
     Context context;
+    Controlador controlador;
     Handler handler = new Handler();
-    RunOnPressAndHold eventHandler;
+    RunOnPressAndHold event;
 
     int srcWidth;
     int srcHeight;
 
-    public TouchEvents(RunOnPressAndHold eventHandler, Context context){
+    public ImageViewNavigation(Context context, Controlador controlador){
         this.context = context;
-        this.eventHandler = eventHandler;
+        this.controlador = controlador;
 
         srcWidth  = context.getResources().getDrawable(R.drawable.planta_predio_2).getIntrinsicWidth();
         srcHeight = context.getResources().getDrawable(R.drawable.planta_predio_2).getIntrinsicHeight();
@@ -38,9 +39,9 @@ public class TouchEvents implements View.OnTouchListener {
             xscroll = view.getScrollX();
             yscroll = view.getScrollY();
 
-            eventHandler.setXY((int) xdown + xscroll, (int) ydown + yscroll);
+            event = new RunOnPressAndHold((int) xdown + xscroll, (int) ydown + yscroll, controlador);
 
-            handler.postDelayed(eventHandler, ViewConfiguration.getLongPressTimeout());
+            handler.postDelayed(event, ViewConfiguration.getLongPressTimeout());
             return true;
         }
 
@@ -61,7 +62,7 @@ public class TouchEvents implements View.OnTouchListener {
             }
 
             if(xmove > 5 || ymove > 5){
-                handler.removeCallbacks(eventHandler);
+                handler.removeCallbacks(event);
             }
 
             if ((xmove + xscroll) < (srcWidth - view.getWidth()) && (xmove + xscroll) >= 0){
@@ -79,7 +80,7 @@ public class TouchEvents implements View.OnTouchListener {
         }
 
         if(motionEvent.getAction() == MotionEvent.ACTION_UP){
-            handler.removeCallbacks(eventHandler);
+            handler.removeCallbacks(event);
             return true;
         }
 
