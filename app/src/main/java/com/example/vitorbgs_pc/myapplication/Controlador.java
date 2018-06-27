@@ -19,6 +19,7 @@ public class Controlador {
     private Context context;
     private ImageView imgview;
     private List<Coordenadas> co;
+    private Ponto selecao;
     private ModuloWiFi moduloWiFi;
     private ControladorBancoDados controladordb;
 
@@ -39,8 +40,11 @@ public class Controlador {
 
         if(ponto != null){
             Log.i("", "Ponto já existe. ID: "+ ponto.getId() + " " + ponto.getCoordenadas().toString());
-            return; // TODO
+            mostrarSelecaoImageView(ponto);
+            return;
         }
+
+        selecao = null;
 
         moduloWiFi.startScan();
         co.add(new Coordenadas(x, y));
@@ -52,8 +56,8 @@ public class Controlador {
             adicionarPontoImageView(ponto);
             controladordb.insereDados(ponto);
 
-            Log.i("", "List results: " + results.size());
-            Log.i("", ponto.toString());
+//            Log.i("", "List results: " + results.size());
+//            Log.i("", ponto.toString());
         }
     }
 
@@ -82,6 +86,11 @@ public class Controlador {
         desenharImageView();
     }
 
+    private void mostrarSelecaoImageView(Ponto ponto){
+        selecao = ponto;
+        desenharImageView();
+    }
+
     public void desenharImageView(){
         Bitmap bmp_planta = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
         Bitmap tempbm = Bitmap.createBitmap(bmp_planta.getWidth(), bmp_planta.getHeight(), Bitmap.Config.RGB_565);
@@ -89,10 +98,17 @@ public class Controlador {
         Canvas canvas = new Canvas(tempbm);
         canvas.drawBitmap(bmp_planta, 0, 0, null);
 
-        final Bitmap icone_pin = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
+        Bitmap icone_pin = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
 
         for (int i = 0; i < co.size(); i++){
-            canvas.drawBitmap(icone_pin, co.get(i).getX()- icone_pin.getWidth()/2, co.get(i).getY()- icone_pin.getHeight(), null);
+            if(selecao == null || selecao.getCoordenadas() != co.get(i)){
+                canvas.drawBitmap(icone_pin, co.get(i).getX()- icone_pin.getWidth()/2, co.get(i).getY()- icone_pin.getHeight(), null);
+            }
+        }
+
+        if(selecao != null){
+            Bitmap icone_selecao = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
+            canvas.drawBitmap(icone_selecao, selecao.getCoordenadas().getX() - icone_selecao.getWidth()/2, selecao.getCoordenadas().getY() - icone_selecao.getHeight(), null);
         }
 
         imgview.setImageBitmap(tempbm);
