@@ -22,8 +22,4 @@ public class MainActivity extends Activity {
 
         iv.setOnTouchListener(new ImageViewNavigation(this, controlador));
     }
-
-
-
-
 }

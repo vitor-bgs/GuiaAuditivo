@@ -1,6 +1,7 @@
 package com.example.vitorbgs_pc.myapplication;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -19,15 +20,28 @@ public class Controlador {
     private ImageView imgview;
     private List<Coordenadas> co;
     private ModuloWiFi moduloWiFi;
+    private ControladorBancoDados controladordb;
 
     public Controlador(Context context, ImageView imgview, List<Coordenadas> co){
         this.co = co;
         this.context = context;
         this.imgview = imgview;
         this.moduloWiFi = new ModuloWiFi(context, this);
+        controladordb = new ControladorBancoDados(context);
+
+        inicializarImageView();
+
     }
 
     public void cadastrarNovoPonto(int x, int y){
+
+        Ponto ponto = isExistePontoCadastrado(x, y);
+
+        if(ponto != null){
+            Log.i("", "Ponto já existe. ID: "+ ponto.getId() + " " + ponto.getCoordenadas().toString());
+            return; // TODO
+        }
+
         moduloWiFi.startScan();
         co.add(new Coordenadas(x, y));
     }
@@ -36,14 +50,39 @@ public class Controlador {
         if(co.size() > 0) {
             Ponto ponto = new Ponto(co.get(co.size() - 1), "", results);
             adicionarPontoImageView(ponto);
+            controladordb.insereDados(ponto);
+
             Log.i("", "List results: " + results.size());
             Log.i("", ponto.toString());
         }
     }
 
+    public Ponto isExistePontoCadastrado(int x, int y){
+        Ponto ponto = null;
+        Cursor cursor = controladordb.carregaDados();
+
+        while(!cursor.isAfterLast()){
+            if(cursor.getString(cursor.getColumnIndex("_id"))!= null){
+                int db_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex("_id")));
+                int db_x = Integer.parseInt(cursor.getString(cursor.getColumnIndex("X")));
+                int db_y = Integer.parseInt(cursor.getString(cursor.getColumnIndex("Y")));
+
+                if ((db_x > x -25) && (db_x < x + 25) && (db_y > y - 25) && (db_y < y + 25)){
+                    ponto = new Ponto(db_id, new Coordenadas(db_x, db_y));
+                }
+            }
+            cursor.moveToNext();
+        }
+
+        return ponto;
+    }
+
     public void adicionarPontoImageView(Ponto ponto){
         co.add(ponto.getCoordenadas());
+        desenharImageView();
+    }
 
+    public void desenharImageView(){
         Bitmap bmp_planta = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
         Bitmap tempbm = Bitmap.createBitmap(bmp_planta.getWidth(), bmp_planta.getHeight(), Bitmap.Config.RGB_565);
 
@@ -57,7 +96,6 @@ public class Controlador {
         }
 
         imgview.setImageBitmap(tempbm);
-
     }
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
@@ -75,4 +113,20 @@ public class Controlador {
         return bitmap;
     }
 
+    private void inicializarImageView(){
+        Cursor cursor = controladordb.carregaDados();
+
+        while(!cursor.isAfterLast()){
+            if(cursor.getString(cursor.getColumnIndex("_id"))!= null){
+                int db_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex("_id")));
+                int db_x = Integer.parseInt(cursor.getString(cursor.getColumnIndex("X")));
+                int db_y = Integer.parseInt(cursor.getString(cursor.getColumnIndex("Y")));
+
+                co.add(new Coordenadas(db_x, db_y));
+            }
+            cursor.moveToNext();
+        }
+
+        desenharImageView();
+    }
 }
