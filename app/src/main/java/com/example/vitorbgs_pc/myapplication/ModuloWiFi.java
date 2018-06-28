@@ -52,9 +52,15 @@ public class ModuloWiFi {
                 sb.append("\n");
             }
 
-            Log.i("", wifiScanList.size() + sb.toString());
+            //Log.i("", wifiScanList.size() + sb.toString());
 
-            controlador.finalizarCadastro(wifiScanList);
+            if(controlador.getTipo() == Controlador.ACTIVITY_TREINAMENTO){
+                controlador.finalizarCadastro(wifiScanList);
+            }
+
+            if(controlador.getTipo() == Controlador.ACTIVITY_NAVIGATION){
+                controlador.exibirPosicao(wifiScanList);
+            }
         }
     }
 

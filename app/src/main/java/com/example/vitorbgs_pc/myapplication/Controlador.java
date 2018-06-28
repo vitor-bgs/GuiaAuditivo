@@ -8,30 +8,129 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.wifi.ScanResult;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Controlador {
+
+    public static final int ACTIVITY_TREINAMENTO = 1;
+    public static final int ACTIVITY_NAVIGATION = 0;
+
     private Context context;
     private ImageView imgview;
     private List<Coordenadas> co;
     private Ponto selecao;
     private ModuloWiFi moduloWiFi;
     private ControladorBancoDados controladordb;
+    private int tipoActivity;
+    private Handler handler = new Handler();
+    private int delay = 10000; //milliseconds
 
-    public Controlador(Context context, ImageView imgview, List<Coordenadas> co){
-        this.co = co;
+    private boolean habilitarCadastro = false;
+
+    public Controlador(Context context, ImageView imgview, int tipo){
+        this.tipoActivity = tipo;
         this.context = context;
         this.imgview = imgview;
         this.moduloWiFi = new ModuloWiFi(context, this);
+        co = new ArrayList<Coordenadas>();
         controladordb = new ControladorBancoDados(context);
 
         inicializarImageView();
 
+    }
+
+    public void iniciarModoPosicionamento(){
+
+        Cursor cursor = controladordb.verificarDB();
+        cursor.moveToFirst();
+
+        while(!cursor.isAfterLast()){
+            Log.i("", cursor.getString(cursor.getColumnIndex("_id")) + " " + cursor.getString(cursor.getColumnIndex("BSSID")) + " " + cursor.getString(cursor.getColumnIndex("INTENSIDADE")));
+            cursor.moveToNext();
+        }
+
+        moduloWiFi.startScan();
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                moduloWiFi.startScan();
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
+    }
+
+    private Ponto verificarPosicao(List<ScanResult> scanResults){
+        Ponto posicao = null;
+        Cursor cursor;
+        int[] ids = new int[scanResults.size()];
+
+
+        for(int i = 0; i < scanResults.size(); i++){
+            cursor = controladordb.verificarFingerprint(scanResults.get(i).BSSID, Integer.toString(scanResults.get(i).level));
+            if(cursor != null) {
+                try{
+                    ids[i] = Integer.parseInt(cursor.getString(cursor.getColumnIndex("ID")));
+                }
+                catch (Exception e){
+
+                }
+            }
+        }
+
+        int id = 0;
+
+        for(int i = 0; i < ids.length; i++){
+            if(ids[i] > 0){
+                id = ids[i];
+            }
+        }
+
+
+        if(id > 0){
+            String nome;
+            Coordenadas coord;
+            int idcoord;
+
+            cursor = controladordb.consultarPonto(id);
+
+            //Log.i("", cursor.getString(cursor.getColumnIndex("IDCOORDENADAS")));
+
+            if(cursor != null && cursor.moveToFirst()){
+                nome = cursor.getString(cursor.getColumnIndex("NOME"));
+                idcoord = Integer.parseInt(cursor.getString(cursor.getColumnIndex("IDCOORDENADAS")));
+
+                cursor = controladordb.consultarCoordenada(idcoord);
+
+                if(cursor != null && cursor.moveToFirst()){
+                    int x = Integer.parseInt(cursor.getString(cursor.getColumnIndex("X")));
+                    int y = Integer.parseInt(cursor.getString(cursor.getColumnIndex("Y")));
+                    coord = new Coordenadas(x, y);
+                    posicao = new Ponto(id, coord, nome, null);
+                }
+            }
+        }
+
+        return posicao;
+    }
+
+    public void exibirPosicao(List<ScanResult> scanResults){
+
+        Ponto ponto = verificarPosicao(scanResults);
+        if(ponto != null){
+            selecao = ponto;
+        }
+        desenharImageView();
+
+    }
+
+    public int getTipo(){
+        return tipoActivity;
     }
 
     public void cadastrarNovoPonto(int x, int y){
@@ -45,25 +144,23 @@ public class Controlador {
         }
 
         selecao = null;
-
+        habilitarCadastro = true;
         moduloWiFi.startScan();
         co.add(new Coordenadas(x, y));
     }
 
     public void finalizarCadastro(List<ScanResult> results){
-        if(co.size() > 0) {
+        if(co.size() > 0 && habilitarCadastro) {
             Ponto ponto = new Ponto(co.get(co.size() - 1), "", results);
             adicionarPontoImageView(ponto);
             controladordb.insereDados(ponto);
-
-//            Log.i("", "List results: " + results.size());
-//            Log.i("", ponto.toString());
+            habilitarCadastro = false;
         }
     }
 
     public Ponto isExistePontoCadastrado(int x, int y){
         Ponto ponto = null;
-        Cursor cursor = controladordb.carregaDados();
+        Cursor cursor = controladordb.consultarCoordenadas();
 
         while(!cursor.isAfterLast()){
             if(cursor.getString(cursor.getColumnIndex("_id"))!= null){
@@ -71,7 +168,7 @@ public class Controlador {
                 int db_x = Integer.parseInt(cursor.getString(cursor.getColumnIndex("X")));
                 int db_y = Integer.parseInt(cursor.getString(cursor.getColumnIndex("Y")));
 
-                if ((db_x > x -25) && (db_x < x + 25) && (db_y > y - 25) && (db_y < y + 25)){
+                if ((db_x > x -25) && (db_x < x + 25) && (db_y > y - 30) && (db_y < y + 60)){
                     ponto = new Ponto(db_id, new Coordenadas(db_x, db_y));
                 }
             }
@@ -130,7 +227,7 @@ public class Controlador {
     }
 
     private void inicializarImageView(){
-        Cursor cursor = controladordb.carregaDados();
+        Cursor cursor = controladordb.consultarCoordenadas();
 
         while(!cursor.isAfterLast()){
             if(cursor.getString(cursor.getColumnIndex("_id"))!= null){
@@ -144,5 +241,23 @@ public class Controlador {
         }
 
         desenharImageView();
+    }
+
+
+    public static int mode(int a[]) {
+        int maxValue = -1, maxCount = 0;
+
+        for (int i = 0; i < a.length; ++i) {
+            int count = 0;
+            for (int j = 0; j < a.length; ++j) {
+                if (a[j] == a[i]) ++count;
+            }
+            if (count > maxCount) {
+                maxCount = count;
+                maxValue = a[i];
+            }
+        }
+
+        return maxValue;
     }
 }

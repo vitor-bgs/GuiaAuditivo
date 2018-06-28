@@ -39,8 +39,18 @@ public class Ponto {
         return coordenadas;
     }
 
+    public List<ScanResult> getFingerprint(){
+        return fingerprint;
+    }
+
+    public String getNome(){
+        return nome;
+    }
+
     @Override
     public String toString(){
         return "ID: " + id + "Nome: " + nome + ", " + coordenadas + ", " + fingerprint.toString();
     }
+
+
 }

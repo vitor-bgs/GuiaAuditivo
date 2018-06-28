@@ -25,6 +25,7 @@ public class ImageViewNavigation implements View.OnTouchListener {
         this.context = context;
         this.controlador = controlador;
 
+
         srcWidth  = context.getResources().getDrawable(R.drawable.planta_predio_2).getIntrinsicWidth();
         srcHeight = context.getResources().getDrawable(R.drawable.planta_predio_2).getIntrinsicHeight();
     }
@@ -39,9 +40,11 @@ public class ImageViewNavigation implements View.OnTouchListener {
             xscroll = view.getScrollX();
             yscroll = view.getScrollY();
 
-            event = new RunOnPressAndHold((int) xdown + xscroll, (int) ydown + yscroll, controlador);
+            if(controlador.getTipo() == Controlador.ACTIVITY_TREINAMENTO){
+                event = new RunOnPressAndHold((int) xdown + xscroll, (int) ydown + yscroll, controlador);
+                handler.postDelayed(event, ViewConfiguration.getLongPressTimeout());
 
-            handler.postDelayed(event, ViewConfiguration.getLongPressTimeout());
+            }
             return true;
         }
 

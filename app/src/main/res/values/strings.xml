@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Guia Auditivo</string>
+    <string name="title_activity_navigation">Guia Auditivo</string>
+    <string name="title_main_activity">Treinamento</string>
 </resources>
