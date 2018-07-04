@@ -13,6 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:name=".ActivityNavigation"
             android:label="@string/title_activity_navigation"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -23,6 +24,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:name=".ActivityTreinamento"
             android:label="@string/title_main_activity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">

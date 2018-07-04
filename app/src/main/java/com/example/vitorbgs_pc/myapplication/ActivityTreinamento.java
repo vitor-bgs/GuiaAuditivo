@@ -9,61 +9,39 @@ import android.view.View;
 import android.widget.ImageView;
 import android.support.v7.widget.Toolbar;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class ActivityTreinamento extends AppCompatActivity {
+
+    ImageViewNavigation ivn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_treinamento);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(myToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_back);
         getSupportActionBar().setTitle("Treinamento");
-        myToolbar.setNavigationIcon(R.drawable.ic_back);
-
-        myToolbar.setNavigationOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                Intent myIntent = new Intent(view.getContext(), ActivityNavigation.class);
-                startActivityForResult(myIntent, 0);
-            }
-        });
 
         ImageView iv = (ImageView) findViewById(R.id.imageView);
+        ivn = new ImageViewNavigation(this, ImageViewNavigation.ACTIVITY_TREINAMENTO);
 
-        Controlador controlador = new Controlador(this, iv, Controlador.ACTIVITY_TREINAMENTO);
+        iv.setOnTouchListener(ivn);
 
-        iv.setOnTouchListener(new ImageViewNavigation(this, controlador));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent myIntent = new Intent(ActivityTreinamento.this, ActivityNavigation.class);
+                //ivn.kill();
+                startActivity(myIntent);
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.menu_treinamento, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_back:
-                // User chose the "Settings" item, show the app settings UI...
-
-                return true;
-//
-//            case R.id.action_favorite:
-//                // User chose the "Favorite" action, mark the current item
-//                // as a favorite...
-//                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
     }
 }

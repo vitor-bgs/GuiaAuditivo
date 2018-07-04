@@ -17,23 +17,9 @@ public class Ponto {
         this.fingerprint = fingerprint;
     }
 
-    public Ponto(Coordenadas coordenadas, String nome, List<ScanResult> fingerprint){
-        this.id = -1;
-        this.coordenadas = coordenadas;
-        this.nome = nome;
-        this.fingerprint = fingerprint;
-    }
-
-    public Ponto(int id, Coordenadas coordenadas){
-        this.id = id;
-        this.coordenadas = coordenadas;
-        this.fingerprint = null;
-    }
-
     public int getId(){
         return id;
     }
-
 
     public Coordenadas getCoordenadas() {
         return coordenadas;
@@ -45,6 +31,10 @@ public class Ponto {
 
     public String getNome(){
         return nome;
+    }
+
+    public void setNome(String nome){
+        this.nome = nome;
     }
 
     @Override

@@ -8,26 +8,37 @@ import android.view.ViewConfiguration;
 
 public class ImageViewNavigation implements View.OnTouchListener {
 
+
+    public static final int ACTIVITY_TREINAMENTO = 1;
+    public static final int ACTIVITY_NAVIGATION = 0;
+
     float xdown, xup;
     float ydown, yup;
     int xscroll = 0;
     int yscroll = 0;
 
     Context context;
-    Controlador controlador;
     Handler handler = new Handler();
     RunOnPressAndHold event;
+    int tipoActivity;
+
+    ControladorTreinamento controladorTreinamento;
 
     int srcWidth;
     int srcHeight;
 
-    public ImageViewNavigation(Context context, Controlador controlador){
+    public ImageViewNavigation(Context context, int tipoActivity){
         this.context = context;
-        this.controlador = controlador;
+        this.tipoActivity = tipoActivity;
 
+        controladorTreinamento = new ControladorTreinamento(context);
 
         srcWidth  = context.getResources().getDrawable(R.drawable.planta_predio_2).getIntrinsicWidth();
         srcHeight = context.getResources().getDrawable(R.drawable.planta_predio_2).getIntrinsicHeight();
+    }
+
+    public void kill(){
+        controladorTreinamento.kill();
     }
 
 
@@ -40,8 +51,8 @@ public class ImageViewNavigation implements View.OnTouchListener {
             xscroll = view.getScrollX();
             yscroll = view.getScrollY();
 
-            if(controlador.getTipo() == Controlador.ACTIVITY_TREINAMENTO){
-                event = new RunOnPressAndHold((int) xdown + xscroll, (int) ydown + yscroll, controlador);
+            if(tipoActivity == ImageViewNavigation.ACTIVITY_TREINAMENTO){
+                event = new RunOnPressAndHold((int) xdown + xscroll, (int) ydown + yscroll, controladorTreinamento);
                 handler.postDelayed(event, ViewConfiguration.getLongPressTimeout());
 
             }
@@ -75,10 +86,6 @@ public class ImageViewNavigation implements View.OnTouchListener {
                 view.setScrollY(ymove + yscroll);
             }
 
-            String text = String.format("DOWN[X: %s, Y: %s]\n\r" +
-                    "UP[X: %s, Y: %s]\n\r" +
-                    "MOVE[X: %s, Y: %s]\n\r" +
-                    "M+S[X: %s, Y: %s]", xdown, ydown, xup, yup, srcWidth, srcHeight, xmove + xscroll, ymove + yscroll);
             return true;
         }
 
@@ -88,5 +95,23 @@ public class ImageViewNavigation implements View.OnTouchListener {
         }
 
         return false;
+    }
+
+    private class RunOnPressAndHold implements Runnable{
+
+        private int x = 0;
+        private int y = 0;
+        private ControladorTreinamento controladorTreinamento;
+
+        public RunOnPressAndHold(int x, int y, ControladorTreinamento controladorTreinamento) {
+            this.x = x;
+            this.y = y;
+            this.controladorTreinamento = controladorTreinamento;
+        }
+
+        @Override
+        public void run() {
+            controladorTreinamento.cadastrarNovoPonto(x, y);
+        }
     }
 }
