@@ -39,8 +39,6 @@ public class ControladorTreinamento {
 
         mapa = new Mapa(context, co);
         mapa.inicializarMapa();
-
-
     }
 
     private class DialogoConfirmacao {
@@ -58,6 +56,14 @@ public class ControladorTreinamento {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
             alertDialogBuilder.setView(promptsView);
             alertDialogBuilder.setTitle("Nome (Opcional):");
+
+            String message = "";
+
+            for(int i = 0; i < results.size(); i++){
+                message += String.format("BSSID: %s, I: %s \n", results.get(i).BSSID, results.get(i).level);
+            }
+
+            alertDialogBuilder.setMessage(message);
 
             alertDialogBuilder.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override

@@ -29,9 +29,9 @@ public class Mapa {
         this.context = context;
         this.imageView = ((Activity) context).findViewById(R.id.imageView);
         this.co = coordenadas;
-        this.icone_selecao = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
-        this.icone_pin = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
-        this.bmp_planta = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
+        icone_selecao = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
+        icone_pin = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
+        bmp_planta = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
     }
 
     public void recycle(){
@@ -39,6 +39,13 @@ public class Mapa {
         icone_selecao.recycle();
         bmp_planta.recycle();
     }
+
+    private void inicializarImagens(){
+        icone_selecao = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
+        icone_pin = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
+        bmp_planta = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
+    }
+
 
     public void adicionarPontoImageView(Ponto ponto){
         co.add(ponto.getCoordenadas());
@@ -53,7 +60,7 @@ public class Mapa {
     public void desenharMapa(){
 
         if(icone_selecao.isRecycled() || icone_pin.isRecycled() ||  bmp_planta.isRecycled() ){
-            return;
+            inicializarImagens();
         }
 
         ((Activity) context).runOnUiThread(new Runnable(){
@@ -62,6 +69,7 @@ public class Mapa {
                 Bitmap tempbm = Bitmap.createBitmap(bmp_planta.getWidth(), bmp_planta.getHeight(), Bitmap.Config.RGB_565);
                 Canvas canvas = new Canvas(tempbm);
                 canvas.drawBitmap(bmp_planta, 0, 0, null);
+
                 for (int i = 0; i < co.size(); i++){
                     if(selecao == null || selecao.getCoordenadas() != co.get(i)){
                         canvas.drawBitmap(icone_pin, co.get(i).getX()- icone_pin.getWidth()/2, co.get(i).getY()- icone_pin.getHeight(), null);

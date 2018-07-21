@@ -29,6 +29,7 @@ public class ControladorPosicionamento {
     private Mapa mapa;
     private Context context;
     private boolean inicializado = false;
+    private SintetizadorVoz tts;
 
 
     public ControladorPosicionamento(Context context){
@@ -36,6 +37,7 @@ public class ControladorPosicionamento {
         controladordb = new ControladorBancoDados(context);
         co = new ArrayList<Coordenadas>();
         mapa = new Mapa(context, co);
+        tts = new SintetizadorVoz(context);
 
         mapa.inicializarMapa();
         wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -162,6 +164,7 @@ public class ControladorPosicionamento {
                 int y = Integer.parseInt(cursor.getString(cursor.getColumnIndex("Y")));
                 coord = new Coordenadas(x, y);
                 posicao = new Ponto(id, coord, nome, null);
+                tts.falar(nome);
             }
         }
 

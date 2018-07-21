@@ -13,18 +13,22 @@ import java.util.List;
 public class ModuloWiFi {
 
     private WifiManager wifiManager;
-    private WifiReceiver wifireceiver;
+    private WifiReceiver wifiReceiver;
     private List<ScanResult> wifiScanList = new ArrayList<ScanResult>();
     private ControladorTreinamento controladorTreinamento;
+    Context context;
 
     public ModuloWiFi(Context context, ControladorTreinamento controladorTreinamento){
         this.controladorTreinamento = controladorTreinamento;
+        this.context = context;
+
         wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        wifireceiver = new WifiReceiver(wifiManager);
-        context.registerReceiver(wifireceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        wifiReceiver = new WifiReceiver(wifiManager);
+        context.registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 
     public boolean startScan(){
+        wifiReceiver = new WifiReceiver(wifiManager);
         return wifiManager.startScan();
     }
 
@@ -52,6 +56,7 @@ public class ModuloWiFi {
             }
             //Log.i("", wifiScanList.size() + sb.toString());
             controladorTreinamento.mostrarDialogo(wifiScanList);
+
         }
     }
 

@@ -39,8 +39,6 @@ public class ActivityNavigation extends AppCompatActivity {
         controlador.iniciarModoPosicionamento();
 
         toolbar.setOnMenuItemClickListener(new MenuOnClick());
-
-
     }
 
     private class MenuOnClick implements Toolbar.OnMenuItemClickListener{
