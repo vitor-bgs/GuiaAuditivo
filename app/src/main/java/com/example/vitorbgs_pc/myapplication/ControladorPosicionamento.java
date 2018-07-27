@@ -113,16 +113,19 @@ public class ControladorPosicionamento {
 
         Map<String, String> map = new HashMap<String, String>();
 
+        //Início Log - Resultado da Leitura das intensidades Wi-Fi
         Log.i("", "========");
         for(int i = 0; i < scanResults.size(); i++){
             String id = scanResults.get(i).BSSID;
             String level = Integer.toString(scanResults.get(i).level);
 
-            Log.i("", "BSSID: " + id + " i: " + level);
+            Log.i("WiFi", "BSSID: " + id + " i: " + level);
         }
+        //Fim Log
 
         Log.i("", "-----");
 
+        //Início Log - Leitura Banco de Dados
         int i = 0;
         while(!cursor.isAfterLast()){
 
@@ -131,7 +134,7 @@ public class ControladorPosicionamento {
                 String logbssid = cursor.getString(cursor.getColumnIndex("BSSID"));
                 String loglevel = cursor.getString(cursor.getColumnIndex("INTENSIDADE"));
 
-                Log.i("", "id: " + logid + " bssid: " + logbssid + " i: " + loglevel );
+                Log.i("DB", "id: " + logid + " bssid: " + logbssid + " i: " + loglevel );
 
                 ids[i] = Integer.parseInt(cursor.getString(cursor.getColumnIndex("ID")));
 
@@ -148,6 +151,7 @@ public class ControladorPosicionamento {
             cursor.moveToNext();
             i += 1;
         }
+        //Fim Log
 
         int id = mode(ids);
 

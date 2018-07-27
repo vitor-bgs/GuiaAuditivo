@@ -1,8 +1,9 @@
 package com.example.vitorbgs_pc.myapplication;
 
 import android.net.wifi.ScanResult;
-
 import java.util.List;
+
+
 
 public class Ponto {
     private int id;

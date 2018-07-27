@@ -9,6 +9,7 @@ import java.util.Locale;
 public class SintetizadorVoz {
 
     private TextToSpeech mTTS;
+    private String ultimaFala = "";
 
     public SintetizadorVoz(Context context){
         mTTS = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
@@ -28,7 +29,10 @@ public class SintetizadorVoz {
     }
 
     public void falar(String texto){
-        mTTS.speak(texto, TextToSpeech.QUEUE_FLUSH, null);
+        if(texto != ultimaFala){
+            mTTS.speak(texto, TextToSpeech.QUEUE_FLUSH, null);
+            ultimaFala = texto;
+        }
     }
 
 }
