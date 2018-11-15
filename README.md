@@ -1,4 +1,4 @@
-# Testes Guia Auditivo
+# Guia Auditivo
 
 Testes para o projeto Guia Auditivo
 
