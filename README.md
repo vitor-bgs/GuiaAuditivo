@@ -1,6 +1,6 @@
 # Guia Auditivo
 
-Testes para o projeto Guia Auditivo
+Projeto Guia Auditivo
 
 O propósito deste projeto é desenvolver um App que auxilie deficientes visuais a se locomoverem em ambientes internos.
 O App Guia Auditivo utilizará as intensidades do sinal de Wi-Fi para determinar a posição do usuário e guiá-lo.
