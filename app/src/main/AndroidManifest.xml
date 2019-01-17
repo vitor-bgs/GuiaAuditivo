@@ -26,7 +26,7 @@
         </activity>
         <activity
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:name=".ActivityTreinamento"
+            android:name=".ActivityTraining"
             android:label="@string/title_main_activity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
