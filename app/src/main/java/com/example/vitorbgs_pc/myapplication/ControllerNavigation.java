@@ -5,10 +5,12 @@ import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.os.Handler;
 import android.util.Log;
+import android.util.TimingLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
 
 public class ControllerNavigation extends Controller {
 
@@ -92,6 +94,9 @@ public class ControllerNavigation extends Controller {
     private List<int[]> getClosestIndexes(List<ScanResult> scanResults){
         List<int[]> idlist = new ArrayList<int[]>();
 
+        TimingLogger timmings = new TimingLogger("tag", "test");
+        timmings.addSplit("Start");
+
         for(int i = 0; i < scanResults.size(); i++){
             String scanBssid = scanResults.get(i).BSSID;
             int scanLevel = scanResults.get(i).level;
@@ -114,6 +119,10 @@ public class ControllerNavigation extends Controller {
                 allFingerprints.moveToNext();
             }
         }
+
+        timmings.addSplit("End");
+
+        timmings.dumpToLog();
 
         return idlist;
     }

@@ -25,9 +25,18 @@ public class Map {
 
     private ImageView imageView;
 
+    Bitmap selectionIcon;
+    Bitmap pinIcon;
+    Bitmap plantBitmap;
+
     public Map(Context context){
         this.context = context;
         this.co = new ArrayList<int[]>();
+
+        selectionIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
+        pinIcon  = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
+        plantBitmap  = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
+        
         imageView = (ImageView) ((Activity) context).findViewById(R.id.imageView);
         initializeMap();
     }
@@ -47,10 +56,6 @@ public class Map {
         ((Activity) context).runOnUiThread(new Runnable(){
             @Override
             public void run() {
-                Bitmap selectionIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
-                Bitmap pinIcon = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
-                Bitmap plantBitmap = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
-
 
                 Bitmap tempbm = Bitmap.createBitmap(plantBitmap.getWidth(), plantBitmap.getHeight(), Bitmap.Config.RGB_565);
                 Canvas canvas = new Canvas(tempbm);
