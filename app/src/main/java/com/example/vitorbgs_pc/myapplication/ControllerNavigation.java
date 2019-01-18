@@ -3,6 +3,7 @@ package com.example.vitorbgs_pc.myapplication;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.wifi.ScanResult;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -15,101 +16,106 @@ public class ControllerNavigation extends Controller {
     private ControllerDatabase controllerDatabase;
     private VoiceSynthesizer tts;
     private WiFiModule wifiModule; //maybe it shouldn't be here
+    private Map map;
+    private Cursor allPoints;
+    private Cursor allFingerprints;
+    Handler handler = new Handler();
 
 
     // CONSTRUCTOR
     public ControllerNavigation(Context context){
         this.wifiModule = new WiFiModule(context, this);
-        controllerDatabase = new ControllerDatabase(context);
-        tts = new VoiceSynthesizer(context);
+        this.controllerDatabase = new ControllerDatabase(context);
+        this.tts = new VoiceSynthesizer(context);
+        this.map = new Map(context);
+
+        initializeNavigation();
+        wifiModule.startScan();
     }
 
     // CONTROLLER FUNCTIONS
     public void wifiScanReceived(List<ScanResult> scanResults){
-        checkPosition(scanResults);
+        MapPoint currentPosition = checkPosition(scanResults);
+        map.drawMap(currentPosition);
+
+        //log(scanResults);
     }
 
     public void finalize(){
         wifiModule.finalizeWifiModule();
+        handler.removeCallbacksAndMessages(null);
     }
 
     //NAVIGATION FUNCTIONS
-    public void startNavigation(){
-        Cursor cursor = controllerDatabase.verificarDB();
-        cursor.moveToFirst();
+    private void initializeNavigation(){
+        allPoints = controllerDatabase.getAllPoints();
+        allFingerprints = controllerDatabase.getAllFingerprints();
 
-        while(!cursor.isAfterLast()){
-            Log.i("", cursor.getString(cursor.getColumnIndex("_id")) + " " + cursor.getString(cursor.getColumnIndex("BSSID")) + " " + cursor.getString(cursor.getColumnIndex("INTENSIDADE")));
-            cursor.moveToNext();
-        }
+
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                wifiModule.startScan();
+                handler.postDelayed(this, 1000);
+            }
+        }, 1000);
     }
 
     private MapPoint checkPosition(List<ScanResult> scanResults){
-        MapPoint position = null;
-        Cursor cursor;
+        MapPoint currentPosition = null;
 
-        cursor = controllerDatabase.consultarFingerprint(scanResults);
+        List<int[]> idlist = getClosestIndexes(scanResults);
 
+        int[] ids = new int[idlist.size()];
 
-        int[] ids = new int[cursor.getCount()];
-
-        java.util.Map map = new HashMap<String, String>();
-
-        //Log
-        Log.i("", "========");
-        for(int i = 0; i < scanResults.size(); i++){
-            String id = scanResults.get(i).BSSID;
-            String level = Integer.toString(scanResults.get(i).level);
-
-            Log.i("WiFi", "BSSID: " + id + " i: " + level);
+        for(int i = 0; i < idlist.size(); i++){
+            ids[i] = idlist.get(i)[0];
         }
-        //End Log
-
-        Log.i("", "-----");
-
-        int i = 0;
-        while(!cursor.isAfterLast()){
-
-            try {
-                String logid = cursor.getString(cursor.getColumnIndex("ID"));
-                String logbssid = cursor.getString(cursor.getColumnIndex("BSSID"));
-                String loglevel = cursor.getString(cursor.getColumnIndex("INTENSIDADE"));
-
-                Log.i("DB", "id: " + logid + " bssid: " + logbssid + " i: " + loglevel );
-
-                ids[i] = Integer.parseInt(cursor.getString(cursor.getColumnIndex("ID")));
-
-                for(int j = 0; j < scanResults.size(); j++){
-                    if(scanResults.get(j).BSSID == logbssid){
-                        map.put(logbssid, Integer.toString(Integer.parseInt(loglevel) - scanResults.get(j).level));
-                    }
-                }
-            }
-            catch (Exception e){
-                Log.i("", e.toString());
-            }
-
-            cursor.moveToNext();
-            i += 1;
-        }
-        //Fim Log
 
         int id = mode(ids);
 
         if(id > 0){
-            String nome;
-            cursor = controllerDatabase.consultarPonto(id);
+            String name;
+            Cursor cursor = controllerDatabase.getPoint(id);
 
             if(cursor != null && cursor.moveToFirst()){
-                nome = cursor.getString(cursor.getColumnIndex("NOME"));
+                name = cursor.getString(cursor.getColumnIndex("NAME"));
                 int x = Integer.parseInt(cursor.getString(cursor.getColumnIndex("X")));
                 int y = Integer.parseInt(cursor.getString(cursor.getColumnIndex("Y")));
-                position = new MapPoint(id, nome, x, y,null);
-                tts.speak(nome);
+                currentPosition = new MapPoint(id, name, x, y,null);
+                tts.speak(name);
             }
         }
 
-        return position;
+        return currentPosition;
+    }
+
+    private List<int[]> getClosestIndexes(List<ScanResult> scanResults){
+        List<int[]> idlist = new ArrayList<int[]>();
+
+        for(int i = 0; i < scanResults.size(); i++){
+            String scanBssid = scanResults.get(i).BSSID;
+            int scanLevel = scanResults.get(i).level;
+
+            allFingerprints.moveToFirst();
+            while(!allFingerprints.isAfterLast()){
+                String bssid = allFingerprints.getString(allFingerprints.getColumnIndex("BSSID"));
+                int level = allFingerprints.getInt(allFingerprints.getColumnIndex("INTENSITY"));
+                if(scanBssid.equals(bssid)){
+                    if(scanLevel > level - 5){
+                        if(scanLevel < level + 5){
+                            idlist.add(new int[] {
+                                    allFingerprints.getInt(allFingerprints.getColumnIndex("IDFINGERPRINT")),
+                                    Math.abs(allFingerprints.getInt(allFingerprints.getColumnIndex("INTENSITY")) - scanLevel)
+                            });
+                        }
+                    }
+                }
+
+                allFingerprints.moveToNext();
+            }
+        }
+
+        return idlist;
     }
 
     public static int mode(int a[]) {
@@ -127,5 +133,19 @@ public class ControllerNavigation extends Controller {
         }
 
         return maxValue;
+    }
+
+    private void log(List<ScanResult> scanResults){
+        //Log
+        Log.i("", "========");
+        for(int i = 0; i < scanResults.size(); i++){
+            String id = scanResults.get(i).BSSID;
+            String level = Integer.toString(scanResults.get(i).level);
+
+            Log.i("WiFi", "BSSID: " + id + " i: " + level);
+        }
+        //End Log
+
+        Log.i("", "-----");
     }
 }

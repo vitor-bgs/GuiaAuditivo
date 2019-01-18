@@ -31,8 +31,7 @@ public class ControllerTraining extends Controller {
         co = new ArrayList<int[]>();
         controllerDB = new ControllerDatabase(context);
 
-        map = new Map(context, co);
-        map.initializeMap();
+        map = new Map(context);
     }
 
     // CONTROLLER FUNCTIONS
@@ -76,7 +75,8 @@ public class ControllerTraining extends Controller {
 
     public MapPoint isPointRegistered(int x, int y){
         MapPoint mapPoint = null;
-        Cursor cursor = controllerDB.consultarCoordenadas();
+        Cursor cursor = controllerDB.getAllPoints();
+        cursor.moveToFirst();
 
         while(!cursor.isAfterLast()){
             if(cursor.getString(cursor.getColumnIndex("_id"))!= null){

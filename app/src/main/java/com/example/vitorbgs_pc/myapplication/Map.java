@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Map {
@@ -20,11 +21,15 @@ public class Map {
     private final int Y = 1;
 
     private Context context;
-    private final List<int[]> co;
+    private List<int[]> co;
 
-    public Map(Context context, List<int[]> coordinates){
+    private ImageView imageView;
+
+    public Map(Context context){
         this.context = context;
-        this.co = coordinates;
+        this.co = new ArrayList<int[]>();
+        imageView = (ImageView) ((Activity) context).findViewById(R.id.imageView);
+        initializeMap();
     }
 
     public void addPoint(int[] point){
@@ -38,14 +43,15 @@ public class Map {
 
     public void drawMap(MapPoint select){
         final MapPoint selection = select;
-        final Bitmap selectionIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
-        final Bitmap pinIcon = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
-        final Bitmap plantBitmap = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
-        final ImageView imageView = ((Activity) context).findViewById(R.id.imageView);
 
         ((Activity) context).runOnUiThread(new Runnable(){
             @Override
             public void run() {
+                Bitmap selectionIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
+                Bitmap pinIcon = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
+                Bitmap plantBitmap = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
+
+
                 Bitmap tempbm = Bitmap.createBitmap(plantBitmap.getWidth(), plantBitmap.getHeight(), Bitmap.Config.RGB_565);
                 Canvas canvas = new Canvas(tempbm);
                 canvas.drawBitmap(plantBitmap, 0, 0, null);
@@ -81,7 +87,8 @@ public class Map {
 
     public void initializeMap(){
         ControllerDatabase controllerDatabase = new ControllerDatabase(context);
-        Cursor cursor = controllerDatabase.consultarCoordenadas();
+        Cursor cursor = controllerDatabase.getAllPoints();
+        cursor.moveToFirst();
 
         while(!cursor.isAfterLast()){
             if(cursor.getString(cursor.getColumnIndex("_id"))!= null){

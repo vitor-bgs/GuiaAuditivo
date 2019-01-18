@@ -55,72 +55,56 @@ public class ControllerDatabase {
     }
 
     private long insertFingerprintDB(MapPoint mapPoint, long id){
-        long resultado = -1;
+        long result = -1;
         List<ScanResult> fingerprint = mapPoint.getFingerprint();
 
 
         for(int i = 0; i < fingerprint.size(); i++){
 
-            ContentValues valores = new ContentValues();
+            ContentValues values = new ContentValues();
 
-            valores.put("BSSID", fingerprint.get(i).BSSID);
-            valores.put("INTENSIDADE", fingerprint.get(i).level);
-            valores.put("ID", id);
+            values.put(Database.BSSID, fingerprint.get(i).BSSID);
+            values.put(Database.INTENSITY, fingerprint.get(i).level);
+            values.put(Database.IDFINGERPRINT, id);
 
-            resultado = db.insert(Database.FINGERPRINT, null, valores);
+            result = db.insert(Database.FINGERPRINT, null, values);
 
-            if(resultado == -1){
+            if(result == -1){
                 Log.i("","Erro ao inserir Fingerprint");
             }
         }
 
 
-        return resultado;
+        return result;
     }
 
     private long insertPointDB(MapPoint mapPoint, long id){
-        ContentValues valores = new ContentValues();
-        long resultado;
+        ContentValues values = new ContentValues();
+        long result;
 
 
-        valores.put("X", mapPoint.getX());
-        valores.put("Y", mapPoint.getY());
-        valores.put("IDFINGERPRINT", id);
-        valores.put("NOME", mapPoint.getName());
+        values.put(Database.X, mapPoint.getX());
+        values.put(Database.Y, mapPoint.getY());
+        values.put(Database.IDFINGERPRINT, id);
+        values.put(Database.NAME, mapPoint.getName());
 
-        resultado = db.insert(Database.PONTOS, null, valores);
+        result = db.insert(Database.POINTS, null, values);
 
-        if(resultado == -1){
+        if(result == -1){
             Log.i("","Erro ao inserir Pontos");
         }
 
-
-
-        return resultado;
+        return result;
     }
 
-    public Cursor consultarCoordenadas(){
-        Cursor cursor;
-        String[] campos = {Database.ID, "X", "Y"};
-        cursor = db.query(Database.PONTOS, campos, null, null, null, null, null);
-
-        if(cursor != null){
-            cursor.moveToFirst();
-        }
-
-
-        return cursor;
-    }
-
-
-    public Cursor consultarPonto(int id){
+    public Cursor getPoint(int id){
         Cursor cursor = null;
 
-        String[] campos = {Database.ID, "NOME", "X", "Y"};
+        String[] campos = {Database.ID, Database.NAME, Database.X, Database.Y};
         String whereClause = Database.ID + " = ?";
         String[] whereArgs = {Integer.toString(id)};
 
-        cursor = db.query(Database.PONTOS, campos, whereClause, whereArgs, null, null, null);
+        cursor = db.query(Database.POINTS, campos, whereClause, whereArgs, null, null, null);
 
         if(cursor != null){
             cursor.moveToFirst();
@@ -129,35 +113,13 @@ public class ControllerDatabase {
         return cursor;
     }
 
-    public Cursor consultarFingerprint(List<ScanResult> scanResults){
-        String[] campos = {"BSSID", "INTENSIDADE", "ID"};
-        Cursor cursor;
-
-        String whereClause = "(BSSID = ? AND (INTENSIDADE > ? AND INTENSIDADE < ?))";
-
-        String[] whereArgs = new String[scanResults.size()*3];
-
-        for(int i = 0; i < scanResults.size(); i++){
-            whereArgs[i*3] = scanResults.get(i).BSSID;
-            whereArgs[i*3 + 1] = Integer.toString(scanResults.get(i).level - 2);
-            whereArgs[i*3 + 2] = Integer.toString(scanResults.get(i).level + 2);
-
-            if(i < scanResults.size() -1){
-                whereClause += " OR (BSSID = ? AND (INTENSIDADE > ? AND INTENSIDADE < ?))";
-            }
-        }
-
-        cursor = db.query(Database.FINGERPRINT, campos, whereClause, whereArgs, null, null, null);
-
-        if(cursor != null){
-            cursor.moveToFirst();
-        }
-
-        return cursor;
+    public Cursor getAllPoints(){
+        String[] fields = { Database.ID, Database.NAME, Database.X, Database.Y };
+        return db.query(Database.POINTS, fields, null, null, null, null, null);
     }
 
-    public Cursor verificarDB(){
-        String[] campos = {"_id", "BSSID", "INTENSIDADE"};
-        return db.query("FINGERPRINT", campos, null, null, null,  null, null);
+    public Cursor getAllFingerprints(){
+        String[] fields = {Database.IDFINGERPRINT, Database.BSSID, Database.INTENSITY};
+        return db.query(Database.FINGERPRINT, fields, null, null, null, null, null);
     }
 }

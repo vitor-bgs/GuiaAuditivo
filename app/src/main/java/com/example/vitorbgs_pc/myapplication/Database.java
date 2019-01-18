@@ -6,32 +6,43 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class Database extends SQLiteOpenHelper {
 
-    public static final String NOME_BANCO = "guiaauditivomapa.db";
-    public static final String COORDENADAS = "COORDENADAS";
-    public static final String PONTOS = "PONTOS";
+    public static final String DATABASENAME = "guiaauditivomap.db";
+
+    public static final String POINTS = "POINTS";
+    public static final String NAME = "NAME";
+    public static final String X = "X";
+    public static final String Y = "Y";
+
+
+
     public static final String FINGERPRINT = "FINGERPRINT";
+    public static final String IDFINGERPRINT = "IDFINGERPRINT";
+    public static final String BSSID = "BSSID";
+    public static final String INTENSITY = "INTENSITY";
+
+
     public static final String ID = "_id";
-    public static final int VERSAO = 1;
+    public static final int VERSION = 1;
 
     public Database(Context context){
-        super(context, NOME_BANCO, null, VERSAO);
+        super(context, DATABASENAME, null, VERSION);
 
     }
 
     @Override
     public void onCreate(SQLiteDatabase db){
-        db.execSQL("CREATE TABLE " + PONTOS + " (" +
+        db.execSQL("CREATE TABLE " + POINTS + " (" +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "X INTEGER," +
                 "Y INTEGER," +
                 "IDFINGERPRINT INTEGER," +
-                "NOME TEXT);");
+                "NAME TEXT);");
 
         db.execSQL("CREATE TABLE " + FINGERPRINT + " (" +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "BSSID TEXT," +
-                "INTENSIDADE INTEGER," +
-                "ID INTEGER);");
+                "INTENSITY INTEGER," +
+                "IDFINGERPRINT INTEGER);");
     }
 
     @Override

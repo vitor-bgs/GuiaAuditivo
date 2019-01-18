@@ -15,19 +15,18 @@ public class ActivityNavigation extends AppCompatActivity {
     Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final ControllerNavigation controller = new ControllerNavigation(this);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
+
+
+        ImageView iv = (ImageView) findViewById(R.id.imageView);
+        final ControllerNavigation controller = new ControllerNavigation(this);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Guia Auditivo");
-
-        ImageView iv = (ImageView) findViewById(R.id.imageView);
         iv.setOnTouchListener(new ImageViewOnTouch(this, controller));
-
-
-        controller.startNavigation();
 
         toolbar.setOnMenuItemClickListener(new MenuOnClick(){
             @Override
