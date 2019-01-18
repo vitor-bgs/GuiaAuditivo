@@ -43,10 +43,11 @@ public class ControllerDatabase {
 
     private int getLastId(){
         try{
-            String[] campos = {"_id"};
-            Cursor cursor = db.rawQuery("SELECT _id FROM PONTOS ORDER BY _id DESC LIMIT 1", null);
-            cursor.moveToFirst();
-            return Integer.parseInt(cursor.getString(cursor.getColumnIndex("_id")));
+            String[] campos = { Database.ID };
+            Cursor cursor = db.query(Database.POINTS, campos, null, null, null, null, null);
+            cursor.moveToLast();
+            int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex("_id")));
+            return id;
 
         }catch(Exception e){
             Log.i("", "Erro verificar ultimo ID");
@@ -114,12 +115,12 @@ public class ControllerDatabase {
     }
 
     public Cursor getAllPoints(){
-        String[] fields = { Database.ID, Database.NAME, Database.X, Database.Y };
+        String[] fields = { Database.ID, Database.NAME, Database.X, Database.Y, Database.IDFINGERPRINT};
         return db.query(Database.POINTS, fields, null, null, null, null, null);
     }
 
     public Cursor getAllFingerprints(){
-        String[] fields = {Database.IDFINGERPRINT, Database.BSSID, Database.INTENSITY};
+        String[] fields = {Database.ID, Database.IDFINGERPRINT, Database.BSSID, Database.INTENSITY};
         return db.query(Database.FINGERPRINT, fields, null, null, null, null, null);
     }
 }

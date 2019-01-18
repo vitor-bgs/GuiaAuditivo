@@ -36,7 +36,7 @@ public class Map {
         selectionIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_place_blue);
         pinIcon  = getBitmapFromVectorDrawable(context,R.drawable.ic_edit_location);
         plantBitmap  = BitmapFactory.decodeResource(context.getResources(),R.drawable.planta_predio_2);
-        
+
         imageView = (ImageView) ((Activity) context).findViewById(R.id.imageView);
         initializeMap();
     }

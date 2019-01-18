@@ -8,9 +8,7 @@ import android.util.Log;
 import android.util.TimingLogger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
 
 public class ControllerNavigation extends Controller {
 
@@ -52,6 +50,34 @@ public class ControllerNavigation extends Controller {
     private void initializeNavigation(){
         allPoints = controllerDatabase.getAllPoints();
         allFingerprints = controllerDatabase.getAllFingerprints();
+
+        allPoints.moveToFirst();
+
+        while(!allPoints.isAfterLast()){
+            String id, name, x, y, fingerprint;
+            id = allPoints.getString(allPoints.getColumnIndex("_id"));
+            name = allPoints.getString(allPoints.getColumnIndex("NAME"));
+            x = allPoints.getString(allPoints.getColumnIndex("X"));
+            y = allPoints.getString(allPoints.getColumnIndex("Y"));
+            fingerprint = allPoints.getString(allPoints.getColumnIndex("IDFINGERPRINT"));
+
+            Log.i("Point", String.format("id: %s | name: %s | x: %s | y: %s | id_f: %s", id, name, x, y, fingerprint));
+            allPoints.moveToNext();
+        }
+
+
+        allFingerprints.moveToFirst();
+
+        while(!allFingerprints.isAfterLast()){
+            String id, bssid, level, fingerprint;
+            id = allFingerprints.getString(allFingerprints.getColumnIndex("_id"));
+            bssid = allFingerprints.getString(allFingerprints.getColumnIndex("BSSID"));
+            level = allFingerprints.getString(allFingerprints.getColumnIndex("INTENSITY"));
+            fingerprint = allFingerprints.getString(allFingerprints.getColumnIndex("IDFINGERPRINT"));
+
+            Log.i("Fingerprint", String.format("id: %s | BSSID: %s | level: %s, idf: %s", id, bssid, level, fingerprint));
+            allFingerprints.moveToNext();
+        }
 
 
         handler.postDelayed(new Runnable(){
@@ -109,8 +135,8 @@ public class ControllerNavigation extends Controller {
                     if(scanLevel > level - 5){
                         if(scanLevel < level + 5){
                             idlist.add(new int[] {
-                                    allFingerprints.getInt(allFingerprints.getColumnIndex("IDFINGERPRINT")),
-                                    Math.abs(allFingerprints.getInt(allFingerprints.getColumnIndex("INTENSITY")) - scanLevel)
+                                    Integer.parseInt(allFingerprints.getString(allFingerprints.getColumnIndex("IDFINGERPRINT"))),
+                                    Math.abs(Integer.parseInt(allFingerprints.getString(allFingerprints.getColumnIndex("INTENSITY"))) - scanLevel)
                             });
                         }
                     }
